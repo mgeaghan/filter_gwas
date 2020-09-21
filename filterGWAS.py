@@ -55,10 +55,15 @@ def filterGwas(gwasFile, sep, noheader, filterFile, chrCol, bpCol, upstream, dow
                     u = d
                     d = u
                 elif line[3] != '+':
-                    print("WARNING: invalid strand code encountered. Skipping:", line[3])
+                    print("WARNING: invalid strand code encountered. Skipping:", "\t".join(line))
                     continue
-            start = int(line[1]) - u
-            end = int(line[2]) + d + 1
+            start = int(line[1])
+            end = int(line[2])
+            if start < end:
+                start = start - u
+                end = end + d + 1
+            else:
+                print("WARNING: start position greater or equal to end position. Skipping:", "\t".join(line))
             filterDict[chrom].append(range(start, end))
     
     with open(gwasFile, 'r') as f:
