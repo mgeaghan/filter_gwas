@@ -8,7 +8,7 @@ def check_args(args=None):
     parser = argparse.ArgumentParser(description="Filter a GWAS by a list of genomic regions.", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-g', '--gwas', help="GWAS summary statistics file containing at least the chromosome and position of the variants. Accepted chromosome codes: 1-22 for autosomal chromosomes, X or 23 for the X chromosome, Y or 24 for the Y chromosome and M, MT or 25 for mitochondrial DNA.", required=True)
     parser.add_argument('-s', '--sep', help="Delimiter character for GWAS summary statistics. Default = tab ('\t').", default="\t")
-    parser.add_argument('-f', '--filter', help="Tab-separated filter list, containing three columns: chromosome, start position and end position. Expects 1-based inclusive coordinates.", required=True)
+    parser.add_argument('-f', '--filter', help="Tab-separated filter list, containing three columns: chromosome, start position, and end position. Expects 1-based inclusive coordinates, relative to the +/sense strand (i.e. start < end). An optional fourth column including strand information ('+'/'-') can be included, otherwise +/sense strand is assumed.", required=True)
     parser.add_argument('-H', '--noheader', help="Indicate if summary statisitcs lack a header line.", action="store_true")
     parser.add_argument('-c', '--chr', help="Chromosome column number in GWAS file.", required=True)
     parser.add_argument('-b', '--bp', help="Position column number in GWAS file.", required=True)
@@ -48,6 +48,14 @@ def filterGwas(gwasFile, sep, noheader, filterFile, chrCol, bpCol, upstream, dow
                     chrom = 25
                 else:
                     print("WARNING: invalid chromosome code encountered. Skipping:", "\t".join(line))
+                    continue
+            if len(line) == 4:
+                if line[3] == '-':
+                    tmp = u
+                    u = d
+                    d = u
+                elif line[3] != '+':
+                    print("WARNING: invalid strand code encountered. Skipping:", line[3])
                     continue
             start = int(line[1]) - u
             end = int(line[2]) + d + 1
