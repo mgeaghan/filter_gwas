@@ -1,2 +1,2 @@
-# filter_gwas
- Scripts to filter GWAS summary statistics
+# gwas_manip
+ Scripts to filter, edit, and manipulate GWAS summary statistics files.
