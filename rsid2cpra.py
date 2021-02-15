@@ -96,7 +96,7 @@ def convert_gwas(gwasFile, sep, chromNum, bpNum, a1Num, a2Num, rsidNum, lookupDi
 if __name__ == "__main__":
     args = check_args(sys.argv[1:])
     lookup = load_lookup(args.lookup)
-    gwas = convert_gwas(args.gwas, args.sep, args.chrom, args.bp, args.a1, args.a2, args.rsid, lookup, !args.noheader)
+    gwas = convert_gwas(args.gwas, args.sep, args.chrom, args.bp, args.a1, args.a2, args.rsid, lookup, (not args.noheader))
     gwas = ['\t'.join([str(i) for i in j]) for j in gwas]
     gwas = '\n'.join(gwas) + '\n'
     with open(args.output, 'w') as f:
