@@ -13,6 +13,7 @@ def check_args(args=None):
     parser.add_argument('-A', '--a2', help="Column number of A2 allele.", required=True)
     parser.add_argument('-r', '--rsid', help="Column number of rsIDs.", required=True)
     parser.add_argument('-l', '--lookup', help="Lookup file. Contains 2 tab-delimited columns: rsID and CHR:POS:REF:ALT-formatted IDs.", required=True)
+    parser.add_argument('-H', '--noheader', help="Specifies that input GWAS file has no header.", action='store_true')
     parser.add_argument('-o', '--output', help="Output file.", required=True)
     return(parser.parse_args(args))
 
@@ -44,7 +45,7 @@ def revcomp(seq):
     rc_arr.reverse()
     return ''.join(rc_arr)
 
-def convert_gwas(gwasFile, sep, chromNum, bpNum, a1Num, a2Num, rsidNum, lookupDict):
+def convert_gwas(gwasFile, sep, chromNum, bpNum, a1Num, a2Num, rsidNum, lookupDict, header):
     gwasList = []
     sep=sep.replace('\\t', '\t')
     try:
@@ -58,7 +59,8 @@ def convert_gwas(gwasFile, sep, chromNum, bpNum, a1Num, a2Num, rsidNum, lookupDi
         sys.exit()
     with open(gwasFile, 'r') as f:
         reader = csv.reader(f, delimiter=sep)
-        gwasList.append(next(reader))
+        if header:
+            gwasList.append(next(reader))
         for line in reader:
             chrom = line[chromNum]
             bp = line[bpNum]
@@ -94,7 +96,7 @@ def convert_gwas(gwasFile, sep, chromNum, bpNum, a1Num, a2Num, rsidNum, lookupDi
 if __name__ == "__main__":
     args = check_args(sys.argv[1:])
     lookup = load_lookup(args.lookup)
-    gwas = convert_gwas(args.gwas, args.sep, args.chrom, args.bp, args.a1, args.a2, args.rsid, lookup)
+    gwas = convert_gwas(args.gwas, args.sep, args.chrom, args.bp, args.a1, args.a2, args.rsid, lookup, !args.noheader)
     gwas = ['\t'.join([str(i) for i in j]) for j in gwas]
     gwas = '\n'.join(gwas) + '\n'
     with open(args.output, 'w') as f:
