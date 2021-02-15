@@ -29,6 +29,21 @@ def load_lookup(lookupFile):
                 lookupDict[rsid] = [cpra]
     return(lookupDict)
 
+def revcomp(seq):
+    rc_dict = {'A': 'T',
+               'T': 'A',
+               'G': 'C',
+               'C': 'G',
+               'a': 'T',
+               't': 'A',
+               'g': 'C',
+               'c': 'G'}
+    rc_arr = [rc_dict[c] if c in rc_dict else None for c in seq]
+    if None in rc_arr:
+        return None
+    rc_arr.reverse()
+    return ''.join(rc_arr)
+
 def convert_gwas(gwasFile, sep, chromNum, bpNum, a1Num, a2Num, rsidNum, lookupDict):
     gwasList = []
     sep=sep.replace('\\t', '\t')
@@ -53,15 +68,24 @@ def convert_gwas(gwasFile, sep, chromNum, bpNum, a1Num, a2Num, rsidNum, lookupDi
             var_cpra = ":".join([chrom, bp, a1, a2])
             var_cpar = ":".join([chrom, bp, a2, a1])
             try:
+                var_cpra_rc = ":".join([chrom, bp, revcomp(a1), revcomp(a2)])
+                var_cpar_rc = ":".join([chrom, bp, revcomp(a2), revcomp(a1)])
+            except TypeError:
+                continue
+            try:
                 cpra_lookup = lookupDict[rsid]
             except KeyError:
                 continue
-            if var_cpra in cpra_lookup and var_cpar in cpra_lookup:
-                continue
-            elif var_cpra in cpra_lookup:
+            # if var_cpra in cpra_lookup and var_cpar in cpra_lookup:
+            #     continue
+            if var_cpra in cpra_lookup:
                 line[rsidNum] = var_cpra
             elif var_cpar in cpra_lookup:
                 line[rsidNum] = var_cpar
+            elif var_cpra_rc in cpra_lookup:
+                line[rsidNum] = var_cpra_rc
+            elif var_cpar_rc in cpra_lookup:
+                line[rsidNum] = var_cpar_rc
             else:
                 continue
             gwasList.append(line)
